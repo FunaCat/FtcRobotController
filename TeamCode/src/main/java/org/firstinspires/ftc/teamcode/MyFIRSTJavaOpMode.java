@@ -72,10 +72,12 @@ public class MyFIRSTJavaOpMode extends LinearOpMode {
     private void armSetup() {
         armBase.setTargetPosition(armBase.getCurrentPosition());
         armBase.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        armBase.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         armBase.setPower(1);
 
         armExtension.setTargetPosition(armExtension.getCurrentPosition());
         armExtension.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        armExtension.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         armExtension.setPower(1);
     }
 
@@ -84,6 +86,7 @@ public class MyFIRSTJavaOpMode extends LinearOpMode {
 
         winch.setTargetPosition(winch.getCurrentPosition());
         winch.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        winch.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         winch.setPower(1);
     }
 
@@ -91,15 +94,13 @@ public class MyFIRSTJavaOpMode extends LinearOpMode {
      * Describe this function...
      */
     private void droneSetup() {
-        drone.setPosition(0.1);
+        drone.setPosition(3);
     }
 
     private void clawSetup() {
         claw.setPosition(1);
 
         wrist.setPosition(1);
-
-
     }
 
     private void hubSetup() {
@@ -206,10 +207,11 @@ public class MyFIRSTJavaOpMode extends LinearOpMode {
      * Describe this function...
      */
     private void armExtend() {
+        int extensionIntensity = 10;
         if (gamepad1.left_stick_y < 0) {
-            armExtension.setTargetPosition(-250 + armExtension.getCurrentPosition());
+            armExtension.setTargetPosition(-extensionIntensity + armExtension.getCurrentPosition());
         } else if (gamepad1.left_stick_y > 0) {
-            armExtension.setTargetPosition(250 + armExtension.getCurrentPosition());
+            armExtension.setTargetPosition(extensionIntensity + armExtension.getCurrentPosition());
         }
     }
 
