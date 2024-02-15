@@ -207,7 +207,7 @@ public class MyFIRSTJavaOpMode extends LinearOpMode {
      * Describe this function...
      */
     private void armExtend() {
-        int extensionIntensity = 10;
+        int extensionIntensity = 30;
         if (gamepad1.left_stick_y < 0) {
             armExtension.setTargetPosition(-extensionIntensity + armExtension.getCurrentPosition());
         } else if (gamepad1.left_stick_y > 0) {
