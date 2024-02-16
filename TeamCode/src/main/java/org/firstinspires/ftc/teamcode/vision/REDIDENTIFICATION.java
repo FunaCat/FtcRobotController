@@ -1,21 +1,15 @@
 package org.firstinspires.ftc.teamcode.vision;
 
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
-import org.opencv.core.MatOfPoint;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 import org.openftc.easyopencv.OpenCvPipeline;
 
-import java.util.ArrayList;
-import java.util.List;
-
-public class BLUEIDENTIFICATION extends OpenCvPipeline
-{
+public class REDIDENTIFICATION extends OpenCvPipeline {
     Mat defaultMAT = new Mat();
     Mat mixture_1MAT = new Mat();
 
@@ -25,18 +19,17 @@ public class BLUEIDENTIFICATION extends OpenCvPipeline
 
     static double PERCENT_THRESHOLD = 0.4;
 
-
     private Telemetry telemetry;
 
-    public BLUEIDENTIFICATION(Telemetry telemetry) {
+    public REDIDENTIFICATION(Telemetry telemetry) {
         this.telemetry = telemetry;
     }
 
     @Override
     public Mat processFrame(Mat input) {
         Imgproc.cvtColor(input, mixture_1MAT, Imgproc.COLOR_RGB2HSV);
-        Scalar lowHSV = new Scalar(92, 50, 60);
-        Scalar highHSV = new Scalar(160, 250, 250);
+        Scalar lowHSV = new Scalar(0, 70, 90);
+        Scalar highHSV = new Scalar(8,300, 250);
         Core.inRange(mixture_1MAT, lowHSV, highHSV, mixture_1MAT);
 
         Mat rectangle = mixture_1MAT.submat(ROI);
@@ -49,10 +42,10 @@ public class BLUEIDENTIFICATION extends OpenCvPipeline
         Imgproc.rectangle(mixture_1MAT, ROI, color);
 
         if (rectanglePercentage > PERCENT_THRESHOLD) {
-            telemetry.addLine("Blue detected");
+            telemetry.addLine("Red detected");
         }
         telemetry.update();
         return mixture_1MAT;
-
     }
 }
+
