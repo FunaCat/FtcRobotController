@@ -37,7 +37,7 @@ public class MyFIRSTJavaOpMode extends LinearOpMode {
      */
     private void drone() {
         if (gamepad2.b) {
-            drone.setPosition(3);
+            drone.setPosition(0.35);
         } else {
             drone.setPosition(0.1);
         }
@@ -82,7 +82,7 @@ public class MyFIRSTJavaOpMode extends LinearOpMode {
     }
 
     private void suspensionSetup() {
-        winchLock.setPosition(0);
+        winchLock.setPosition(1);
 
         winch.setTargetPosition(winch.getCurrentPosition());
         winch.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -94,7 +94,7 @@ public class MyFIRSTJavaOpMode extends LinearOpMode {
      * Describe this function...
      */
     private void droneSetup() {
-        drone.setPosition(3);
+        drone.setPosition(0.1);
     }
 
     private void clawSetup() {
@@ -147,10 +147,11 @@ public class MyFIRSTJavaOpMode extends LinearOpMode {
                 drone();
                 claw();
                 winch();
-                //telemetry.addData("wrist", wrist.getPosition());
-                //telemetry.addData("claw", claw.getPosition());
-                //telemetry.addData("winchLock", winchLock.getPosition());
+                telemetry.addData("wrist", wrist.getPosition());
+                telemetry.addData("claw", claw.getPosition());
+                telemetry.addData("winchLock", winchLock.getPosition());
                 telemetry.addData("armExtend", armExtension.getCurrentPosition());
+                telemetry.addData("drone", drone.getPosition());
                 telemetry.update();
             }
         }
@@ -181,9 +182,9 @@ public class MyFIRSTJavaOpMode extends LinearOpMode {
         }
         //winchLock
         if (gamepad1.b) {
-            winchLock.setPosition(0);
+            winchLock.setPosition(0.5);
         } else {
-            winchLock.setPosition(3);
+            winchLock.setPosition(1);
         }
     }
 
