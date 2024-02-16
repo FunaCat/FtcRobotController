@@ -1,11 +1,14 @@
-package org.firstinspires.ftc.teamcode.vision;
+package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.vision.VisionProcessor;
+import org.firstinspires.ftc.robotcore.internal.camera.calibration.CameraCalibration;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
+import android.graphics.Canvas;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
@@ -14,7 +17,7 @@ import org.openftc.easyopencv.OpenCvPipeline;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BLUEIDENTIFICATION extends OpenCvPipeline
+public class BLUEIDENTIFICATION implements VisionProcessor
 {
     Mat defaultMAT = new Mat();
     Mat mixture_1MAT = new Mat();
@@ -33,7 +36,10 @@ public class BLUEIDENTIFICATION extends OpenCvPipeline
     }
 
     @Override
-    public Mat processFrame(Mat input) {
+    public void init(int width, int height, CameraCalibration calibration) {
+        //don't need this
+    }
+    public Object processFrame(Mat input, long captureTimeNanos) {
         Imgproc.cvtColor(input, mixture_1MAT, Imgproc.COLOR_RGB2HSV);
         Scalar lowHSV = new Scalar(92, 50, 60);
         Scalar highHSV = new Scalar(160, 250, 250);
@@ -52,7 +58,10 @@ public class BLUEIDENTIFICATION extends OpenCvPipeline
             telemetry.addLine("Blue detected");
         }
         telemetry.update();
-        return mixture_1MAT;
+        return null;
+    }
 
+    public void onDrawFrame(Canvas canvas, int onscreenWidth, int onscreenHeight, float scaleBmpPxToCanvasPx, float scaleCanvasDensity, Object userContext) {
+        //nothing here
     }
 }
