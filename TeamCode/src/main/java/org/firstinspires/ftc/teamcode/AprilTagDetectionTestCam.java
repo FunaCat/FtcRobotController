@@ -60,7 +60,8 @@ public class AprilTagDetectionTestCam extends LinearOpMode {
 
 
         while (!isStopRequested() && opModeIsActive()) {
-
+            tagProcessor.setPoseSolver(AprilTagProcessor.PoseSolver.OPENCV_IPPE_SQUARE);
+            telemetry.addData("processor", tagProcessor.getPerTagAvgPoseSolveTime());
             if (tagProcessor.getDetections().size() > 0) {
                 AprilTagDetection tag = tagProcessor.getDetections().get(0);
 
