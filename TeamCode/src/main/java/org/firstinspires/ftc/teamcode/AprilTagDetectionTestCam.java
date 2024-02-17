@@ -64,6 +64,9 @@ public class AprilTagDetectionTestCam extends LinearOpMode {
             telemetry.addData("processor", tagProcessor.getPerTagAvgPoseSolveTime());
             if (tagProcessor.getDetections().size() > 0) {
                 AprilTagDetection tag = tagProcessor.getDetections().get(0);
+                for (AprilTagDetection detection :aprilTag.getDetections()) {
+                    telemetry.addData("detection ", detection);
+                }
 
                 telemetry.addData("x", tag.ftcPose.x);
                 telemetry.addData("y", tag.ftcPose.y);
