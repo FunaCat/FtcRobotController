@@ -27,19 +27,28 @@ import java.util.concurrent.TimeUnit;
 
 public class EOCVOpModeTestCam extends LinearOpMode {
     public static class BLUEIDENTIFICATION implements VisionProcessor {
-        Mat mixture_1MAT = new Mat();
+        Mat mixture_LEFT = new Mat();
+        Mat mixture_MIDDLE = new Mat();
+        Mat mixture_RIGHT = new Mat();
         private boolean blueDetected = false;
-        private boolean bluePropDetected = false;
-        public final Rect ROI = new Rect(
-                new Point(100, 175),
-                new Point(300, 325));
+        private boolean propLeft = false;
+        private boolean propMiddle = false;
+        private boolean propRight = false;
 
-        public final Rect ROI_PROP = new Rect(
-                new Point(220, 140),
-                new Point(420, 340));
+        static final Rect ROI_LEFT = new Rect(
+                new Point(0, 175),
+                new Point(150, 325));
+
+        static final Rect ROI_MIDDLE = new Rect(
+                new Point(200, 100),
+                new Point(450, 375));
+
+        static final Rect ROI_RIGHT = new Rect(
+                new Point(500, 175),
+                new Point(640, 325));
 
         final double PERCENT_THRESHOLD = 0.4;
-        final double PERCENT_THRESHOLD_PROP = 0.7;
+        final double PERCENT_THRESHOLD_PROP = 0.5;
 
         @Override
         public void init(int width, int height, CameraCalibration calibration) {
@@ -48,40 +57,40 @@ public class EOCVOpModeTestCam extends LinearOpMode {
 
         @Override
         public Object processFrame(Mat input, long captureTimeNanos) {
-            Imgproc.cvtColor(input, mixture_1MAT, Imgproc.COLOR_RGB2HSV);
+            Imgproc.cvtColor(input, mixture_LEFT, Imgproc.COLOR_RGB2HSV);
+            Imgproc.cvtColor(input, mixture_MIDDLE, Imgproc.COLOR_RGB2HSV);
+            Imgproc.cvtColor(input, mixture_RIGHT, Imgproc.COLOR_RGB2HSV);
             Scalar lowHSV = new Scalar(92, 50, 60);
             Scalar highHSV = new Scalar(160, 250, 250);
-            Core.inRange(mixture_1MAT, lowHSV, highHSV, mixture_1MAT);
+            Core.inRange(mixture_LEFT, lowHSV, highHSV, mixture_LEFT);
+            Core.inRange(mixture_MIDDLE, lowHSV, highHSV, mixture_MIDDLE);
+            Core.inRange(mixture_RIGHT, lowHSV, highHSV, mixture_RIGHT);
 
-            Mat rectangle = mixture_1MAT.submat(ROI);
-            double rectanglePercentage = Core.sumElems(rectangle).val[0] / ROI.area() / 255;
-            rectangle.release();
+            Mat rectangleLeft = mixture_LEFT.submat(ROI_LEFT);
+            Mat rectangleMiddle = mixture_MIDDLE.submat(ROI_MIDDLE);
+            Mat rectangleRight = mixture_RIGHT.submat(ROI_RIGHT);
+            double rectanglePercentageLeft = Core.sumElems(rectangleLeft).val[0] / ROI_LEFT.area() / 255;
+            double rectanglePercentageMiddle = Core.sumElems(rectangleLeft).val[0] / ROI_MIDDLE.area() / 255;
+            double rectanglePercentageRight = Core.sumElems(rectangleLeft).val[0] / ROI_RIGHT.area() / 255;
+            rectangleLeft.release();
+            rectangleMiddle.release();
+            rectangleRight.release();
 
-            Scalar color = new Scalar(255, 100, 0);
-
-            Imgproc.rectangle(mixture_1MAT, ROI, color);
-            if (rectanglePercentage > PERCENT_THRESHOLD)
-                blueDetected = true;
-            else
-                blueDetected = false;
-            if (rectanglePercentage > PERCENT_THRESHOLD_PROP)
-                bluePropDetected = true;
-            else
-                bluePropDetected = false;
+            if (rectanglePercentageLeft > PERCENT_THRESHOLD) {
+                propLeft = true;
+            }
+            else if (rectanglePercentageMiddle > PERCENT_THRESHOLD_PROP) {
+                propMiddle = true;
+            }
+            else if (rectanglePercentageRight > PERCENT_THRESHOLD) {
+                propRight = true;
+            }
             return null;
 
         }
 
         public void onDrawFrame(Canvas canvas, int onscreenWidth, int onscreenHeight, float scaleBmpPxToCanvasPx, float scaleCanvasDensity, Object userContext) {
             //nothing here
-        }
-
-        public boolean getBlueDetected() {
-            return blueDetected;
-        }
-
-        public boolean getBluePropDetected() {
-            return bluePropDetected;
         }
     }//end process
 
@@ -116,24 +125,36 @@ public class EOCVOpModeTestCam extends LinearOpMode {
 
             //spin to find april tags
 
-            while (aprilTagNotFound) {
+            do {
                 checkCoords(tagProcessor);
                 aprilTagNotFound = true;
+            } while (aprilTagNotFound);
 
-            }
+            //depending on team head to these locations using RR
+            //blue spikes (12, -36) heading = 0
+            //blue spikes (-36, -36) heading = 0
+            //red spikes (12, 36) heading = 180
+            //red spikes (-36, 36) heading = 180
 
-            if (//something) {
-                visionPortal.setProcessorEnabled(blueIdentificationProcess, true);
-            }
-            if (blueIdentificationProcess.getBlueDetected()) {
-                //do stuff
-            }
-            if (blueIdentificationProcess.getBluePropDetected()) {
-                //place pixel down
+
+            visionPortal.setProcessorEnabled(blueIdentificationProcess, true);
+            if (blueIdentificationProcess.propLeft) {
+                //bearing 90
+                //drop pixel
+            } else if (blueIdentificationProcess.propMiddle) {
+                // bearing = 0
+                //drop pixel
+            } else if (blueIdentificationProcess.propRight) {
+                //bearing = 270
+                //drop pixel
+            } else {
+                //go to the other spot
             }
             checkCoords(tagProcessor);
         }
-    private boolean setManualExposure(int exposureMS, int gain) {
+    }
+
+    public boolean setManualExposure(int exposureMS, int gain) {
         // Ensure Vision Portal has been setup.
         if (visionPortal == null) {
             return false;
@@ -172,7 +193,7 @@ public class EOCVOpModeTestCam extends LinearOpMode {
         }
     }
 
-    public double calculatePositionX(double IDx, double Apriltagx) {
+    public double calculatePositionX (double IDx, double Apriltagx) {
         return IDx - Apriltagx;
     }
 
@@ -180,7 +201,7 @@ public class EOCVOpModeTestCam extends LinearOpMode {
         return IDy - Apriltagy;
     }
 
-    public void checkCoords(AprilTagProcessor tagProcessor) {
+    public void checkCoords (AprilTagProcessor tagProcessor) {
         setManualExposure(6, 250);
         if (tagProcessor.getDetections().size() > 0) {
             AprilTagDetection tag = tagProcessor.getDetections().get(0);
@@ -236,6 +257,7 @@ public class EOCVOpModeTestCam extends LinearOpMode {
                 }
             }
         }
+        setManualExposure(50, 100);
     }
 }
 
