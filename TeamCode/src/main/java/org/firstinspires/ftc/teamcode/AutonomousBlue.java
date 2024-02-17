@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode;
 
 import android.graphics.Canvas;
 
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.ExposureControl;
@@ -12,20 +11,17 @@ import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.VisionProcessor;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
-import org.opencv.core.MatOfPoint;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
-import org.openftc.easyopencv.OpenCvPipeline;
 
 import java.util.concurrent.TimeUnit;
 
 
-public class EOCVOpModeTestCam extends LinearOpMode {
+public class AutonomousBlue extends LinearOpMode {
     public static class BLUEIDENTIFICATION implements VisionProcessor {
         Mat mixture_LEFT = new Mat();
         Mat mixture_MIDDLE = new Mat();
@@ -138,17 +134,9 @@ public class EOCVOpModeTestCam extends LinearOpMode {
 
 
             visionPortal.setProcessorEnabled(blueIdentificationProcess, true);
-            if (blueIdentificationProcess.propLeft) {
-                //bearing 90
-                //drop pixel
-            } else if (blueIdentificationProcess.propMiddle) {
-                // bearing = 0
-                //drop pixel
-            } else if (blueIdentificationProcess.propRight) {
-                //bearing = 270
-                //drop pixel
-            } else {
-                //go to the other spot
+            dropPixelAtSpikeVoid();
+            if (!dropPixelAtSpikeBoolean()) {
+                dropPixelAtSpikeVoid();
             }
             checkCoords(tagProcessor);
         }
@@ -258,6 +246,37 @@ public class EOCVOpModeTestCam extends LinearOpMode {
             }
         }
         setManualExposure(50, 100);
+    }
+
+    public void dropPixelAtSpikeVoid() { //returns true if drops
+        if (blueIdentificationProcess.propLeft) {
+            //bearing 90
+            //drop pixel
+        } else if (blueIdentificationProcess.propMiddle) {
+            // bearing = 0
+            //drop pixel
+        } else if (blueIdentificationProcess.propRight) {
+            //bearing = 270
+            //drop pixel
+        }
+    }
+
+    public boolean dropPixelAtSpikeBoolean() { //returns true if drops
+        if (blueIdentificationProcess.propLeft) {
+            //bearing 90
+            //drop pixel
+            return true;
+        } else if (blueIdentificationProcess.propMiddle) {
+            // bearing = 0
+            //drop pixel
+            return true;
+        } else if (blueIdentificationProcess.propRight) {
+            //bearing = 270
+            //drop pixel
+            return true;
+        }  else {
+            return false;
+        }
     }
 }
 
