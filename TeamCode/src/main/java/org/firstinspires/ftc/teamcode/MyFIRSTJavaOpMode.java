@@ -101,7 +101,7 @@ public class MyFIRSTJavaOpMode extends LinearOpMode {
     private void clawSetup() {
         claw.setPosition(0);
 
-        wrist.setPosition(1);
+        wrist.setPosition(0);
     }
 
     private void hubSetup() {
