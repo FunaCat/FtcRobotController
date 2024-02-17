@@ -16,7 +16,8 @@ import java.util.concurrent.TimeUnit;
 
 @TeleOp
 public class AprilTagDetectionTestCam extends LinearOpMode {
-
+    static final double Y_SHIFT = 6;
+    static final double X_SHIFT = 0;
     double coordinateX = 0;
     double coordinateY = 0;
     double heading = 0;
@@ -64,64 +65,68 @@ public class AprilTagDetectionTestCam extends LinearOpMode {
                 AprilTagDetection tag = tagProcessor.getDetections().get(0);
                 switch (tag.metadata.id) {
                     case 1: {
-                        coordinateX = calculatePositionx(60, tag.ftcPose.x);
-                        coordinateY = calculatePositionY(-42, tag.ftcPose.y);
-                        heading = tag.ftcPose.yaw;
+                        coordinateX = calculatePositionX(60, tag.ftcPose.y);
+                        coordinateY = (calculatePositionY(-42, tag.ftcPose.x) + Y_SHIFT);
+                        heading = 90;
                         break;
                     }
                     case 2: {
-                        coordinateX = calculatePositionx(60, tag.ftcPose.x);
-                        coordinateY = calculatePositionY(-36, tag.ftcPose.y);
-                        heading = tag.ftcPose.yaw;
+                        coordinateX = calculatePositionX(60, tag.ftcPose.y);
+                        coordinateY = (calculatePositionY(-36, tag.ftcPose.x) + Y_SHIFT);
+                        heading = 90;
                         break;
                     }
                     case 3: {
-                        coordinateX = calculatePositionx(60, tag.ftcPose.x);
-                        coordinateY = calculatePositionY(-30, tag.ftcPose.y);
-                        heading = tag.ftcPose.yaw;
+                        coordinateX = calculatePositionX(60, tag.ftcPose.y);
+                        coordinateY = (calculatePositionY(-30, tag.ftcPose.x) + Y_SHIFT);
+                        heading = 90;
                         break;
                     }
                     case 4: {
-                        coordinateX = calculatePositionx(60, tag.ftcPose.x);
-                        coordinateY = calculatePositionY(30, tag.ftcPose.y);
-                        heading = tag.ftcPose.yaw;
+                        coordinateX = calculatePositionX(60, tag.ftcPose.y);
+                        coordinateY = (calculatePositionY(30, tag.ftcPose.x) + Y_SHIFT);
+                        heading = 90;
                         break;
                     }
                     case 5: {
-                        coordinateX = calculatePositionx(60, tag.ftcPose.x);
-                        coordinateY = calculatePositionY(36, tag.ftcPose.y);
-                        heading = tag.ftcPose.yaw;
+                        coordinateX = calculatePositionX(60, tag.ftcPose.y);
+                        coordinateY = (calculatePositionY(36, tag.ftcPose.x) + Y_SHIFT);
+                        heading = 90;
                         break;
                     }
                     case 6: {
-                        coordinateX = calculatePositionx(60, tag.ftcPose.x);
-                        coordinateY = calculatePositionY(42, tag.ftcPose.y);
-                        heading = tag.ftcPose.yaw;
+                        coordinateX = calculatePositionX(60, tag.ftcPose.y);
+                        coordinateY = (calculatePositionY(42, tag.ftcPose.x) + Y_SHIFT);
+                        heading = 90;
                         break;
                     }
                     case 7: {
-                        coordinateX = calculatePositionx(-72, tag.ftcPose.x);
-                        coordinateY = calculatePositionY(42, tag.ftcPose.y);
-                        heading = tag.ftcPose.yaw;
+                        coordinateX = calculatePositionX(-72, tag.ftcPose.y);
+                        coordinateY = (calculatePositionY(42, tag.ftcPose.x) + Y_SHIFT);
+                        heading = 270;
                     }
                     case 10: {
-                        coordinateX = calculatePositionx(-72, tag.ftcPose.x);
-                        coordinateY = calculatePositionY(-42, tag.ftcPose.y);
-                        heading = tag.ftcPose.yaw;
+                        coordinateX = calculatePositionX(-72, tag.ftcPose.y);
+                        coordinateY = (calculatePositionY(-42, tag.ftcPose.x) + Y_SHIFT);
+                        heading = 270;
                     }
                     default: {
                         break;
                     }
                 }
+                telemetry.addData("Coordinate X ", coordinateX);
+                telemetry.addData("Coordinate Y ", coordinateY);
+                telemetry.addData("Heading ", heading);
+                telemetry.update();
             }
         }
     }
 
-    public double calculatePositionx(double IDx, double Apriltagx) {
+    public double calculatePositionX(double IDx, double Apriltagx) {
         return IDx - Apriltagx;
     }
 
-    public double calculatePositionY(double Apriltagy, double IDy) {
+    public double calculatePositionY(double IDy, double Apriltagy) {
         return IDy - Apriltagy;
     }
 
