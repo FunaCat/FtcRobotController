@@ -19,15 +19,15 @@ import org.openftc.easyopencv.OpenCvPipeline;
 
 public class EOCVOpModeTestCam extends LinearOpMode {
 
-     BLUEIDENTIFICATION blueIdentificationProcess;
-
+    BLUEIDENTIFICATION blueIdentificationProcess;
+    REDIDENTIFICATION redIdentificationProcess;
     VisionPortal visionPortal;
 
     @Override
     public void runOpMode() {
-        visionPortal = VisionPortal.easyCreateWithDefaults(
-                hardwareMap.get(WebcamName.class, "Webcam 1"), blueIdentificationProcess);
-
+        visionPortal = VisionPortal.easyCreateWithDefaults(hardwareMap.get(
+                WebcamName.class, "Webcam 1"), blueIdentificationProcess, redIdentificationProcess);
+        visionPortal.setProcessorEnabled(blueIdentificationProcess, true);
         waitForStart();
 
         while (opModeIsActive()) {

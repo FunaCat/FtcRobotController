@@ -19,7 +19,6 @@ import java.util.List;
 
 public class BLUEIDENTIFICATION implements VisionProcessor
 {
-    Mat defaultMAT = new Mat();
     Mat mixture_1MAT = new Mat();
 
     static final Rect ROI = new Rect(
