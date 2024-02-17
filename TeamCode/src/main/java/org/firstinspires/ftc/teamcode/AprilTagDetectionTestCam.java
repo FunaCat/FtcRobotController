@@ -17,6 +17,9 @@ import java.util.concurrent.TimeUnit;
 @TeleOp
 public class AprilTagDetectionTestCam extends LinearOpMode {
 
+    double coordinateX = 0;
+    double coordinateY = 0;
+    double heading = 0;
     private VisionPortal visionPortal = null;        // Used to manage the video source.
     private AprilTagProcessor aprilTag;              // Used for managing the AprilTag detection process.
     private int     myExposure;
@@ -45,13 +48,9 @@ public class AprilTagDetectionTestCam extends LinearOpMode {
         getCameraSetting();
         myExposure = Math.min(5, minExposure);
         myGain = maxGain;
-        setManualExposure(myExposure, myGain);
 
-        myExposure = Range.clip(myExposure + 1, minExposure, maxExposure);
-        setManualExposure(myExposure, myGain);
+        setManualExposure(6, 250);
 
-        myGain = Range.clip(myGain - 1, minGain, maxGain );
-        setManualExposure(myExposure, myGain);
 
         //myExposure = Range.clip(myExposure - 1, minExposure, maxExposure);
         //setManualExposure(myExposure, myGain);
@@ -61,21 +60,69 @@ public class AprilTagDetectionTestCam extends LinearOpMode {
 
         while (!isStopRequested() && opModeIsActive()) {
             tagProcessor.setPoseSolver(AprilTagProcessor.PoseSolver.OPENCV_IPPE_SQUARE);
-            telemetry.addData("processor", tagProcessor.getPerTagAvgPoseSolveTime());
             if (tagProcessor.getDetections().size() > 0) {
                 AprilTagDetection tag = tagProcessor.getDetections().get(0);
-
-                telemetry.addData("x", tag.ftcPose.x);
-                telemetry.addData("y", tag.ftcPose.y);
-                telemetry.addData("z", tag.ftcPose.z);
-                telemetry.addData("range", tag.ftcPose.range);
-                telemetry.addData("elevation", tag.ftcPose.elevation);
-                telemetry.addData("bearing", tag.ftcPose.bearing);
+                switch (tag.metadata.id) {
+                    case 1: {
+                        coordinateX = calculatePositionx(60, tag.ftcPose.x);
+                        coordinateY = calculatePositionY(-42, tag.ftcPose.y);
+                        heading = tag.ftcPose.yaw;
+                        break;
+                    }
+                    case 2: {
+                        coordinateX = calculatePositionx(60, tag.ftcPose.x);
+                        coordinateY = calculatePositionY(-36, tag.ftcPose.y);
+                        heading = tag.ftcPose.yaw;
+                        break;
+                    }
+                    case 3: {
+                        coordinateX = calculatePositionx(60, tag.ftcPose.x);
+                        coordinateY = calculatePositionY(-30, tag.ftcPose.y);
+                        heading = tag.ftcPose.yaw;
+                        break;
+                    }
+                    case 4: {
+                        coordinateX = calculatePositionx(60, tag.ftcPose.x);
+                        coordinateY = calculatePositionY(30, tag.ftcPose.y);
+                        heading = tag.ftcPose.yaw;
+                        break;
+                    }
+                    case 5: {
+                        coordinateX = calculatePositionx(60, tag.ftcPose.x);
+                        coordinateY = calculatePositionY(36, tag.ftcPose.y);
+                        heading = tag.ftcPose.yaw;
+                        break;
+                    }
+                    case 6: {
+                        coordinateX = calculatePositionx(60, tag.ftcPose.x);
+                        coordinateY = calculatePositionY(42, tag.ftcPose.y);
+                        heading = tag.ftcPose.yaw;
+                        break;
+                    }
+                    case 7: {
+                        coordinateX = calculatePositionx(-72, tag.ftcPose.x);
+                        coordinateY = calculatePositionY(42, tag.ftcPose.y);
+                        heading = tag.ftcPose.yaw;
+                    }
+                    case 10: {
+                        coordinateX = calculatePositionx(-72, tag.ftcPose.x);
+                        coordinateY = calculatePositionY(-42, tag.ftcPose.y);
+                        heading = tag.ftcPose.yaw;
+                    }
+                    default: {
+                        break;
+                    }
+                }
             }
-            telemetry.addData("Exposure","%d  (%d - %d)", myExposure, minExposure, maxExposure);
-            telemetry.addData("Gain","%d  (%d - %d)", myGain, minGain, maxGain);
-            telemetry.update();
         }
+    }
+
+    public double calculatePositionx(double IDx, double Apriltagx) {
+        return IDx - Apriltagx;
+    }
+
+    public double calculatePositionY(double Apriltagy, double IDy) {
+        return IDy - Apriltagy;
     }
 
     private boolean setManualExposure(int exposureMS, int gain) {
