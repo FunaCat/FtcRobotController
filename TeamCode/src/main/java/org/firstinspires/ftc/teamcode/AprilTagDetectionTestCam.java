@@ -17,7 +17,6 @@ import java.util.concurrent.TimeUnit;
 @TeleOp
 public class AprilTagDetectionTestCam extends LinearOpMode {
     static final double Y_SHIFT = 6;
-    static final double X_SHIFT = 0;
     double coordinateX = 0;
     double coordinateY = 0;
     double heading = 0;

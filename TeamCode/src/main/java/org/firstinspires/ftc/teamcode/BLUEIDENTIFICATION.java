@@ -27,13 +27,6 @@ public class BLUEIDENTIFICATION implements VisionProcessor
 
     static double PERCENT_THRESHOLD = 0.4;
 
-
-    private Telemetry telemetry;
-
-    public BLUEIDENTIFICATION(Telemetry telemetry) {
-        this.telemetry = telemetry;
-    }
-
     @Override
     public void init(int width, int height, CameraCalibration calibration) {
         //don't need this
@@ -48,19 +41,22 @@ public class BLUEIDENTIFICATION implements VisionProcessor
         double rectanglePercentage = Core.sumElems(rectangle).val[0] / ROI.area() / 255;
         rectangle.release();
 
-        telemetry.addData("rectangle Percentage: ", Math.round(rectanglePercentage * 100) + "%");
         Scalar color = new Scalar(255, 100, 0);
 
         Imgproc.rectangle(mixture_1MAT, ROI, color);
-
-        if (rectanglePercentage > PERCENT_THRESHOLD) {
-            telemetry.addLine("Blue detected");
-        }
-        telemetry.update();
-        return null;
+        return mixture_1MAT;
     }
 
     public void onDrawFrame(Canvas canvas, int onscreenWidth, int onscreenHeight, float scaleBmpPxToCanvasPx, float scaleCanvasDensity, Object userContext) {
         //nothing here
+    }
+
+    public boolean blueDetected(float rectanglePercentage) {
+        if (rectanglePercentage > PERCENT_THRESHOLD) {
+            return true;
+        }
+        else {
+            return false;
+        }
     }
 }

@@ -1,9 +1,15 @@
 package org.firstinspires.ftc.teamcode;
 
+import android.graphics.Canvas;
+
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.ExposureControl;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.GainControl;
+import org.firstinspires.ftc.robotcore.internal.camera.calibration.CameraCalibration;
 import org.firstinspires.ftc.vision.VisionPortal;
+import org.firstinspires.ftc.vision.VisionProcessor;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -16,23 +22,220 @@ import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 import org.openftc.easyopencv.OpenCvPipeline;
 
+import java.util.concurrent.TimeUnit;
+
 
 public class EOCVOpModeTestCam extends LinearOpMode {
+    public static class BLUEIDENTIFICATION implements VisionProcessor {
+        Mat mixture_1MAT = new Mat();
+        private boolean blueDetected = false;
+        private boolean bluePropDetected = false;
+        public final Rect ROI = new Rect(
+                new Point(100, 175),
+                new Point(300, 325));
+
+        public final Rect ROI_PROP = new Rect(
+                new Point(220, 140),
+                new Point(420, 340));
+
+        final double PERCENT_THRESHOLD = 0.4;
+        final double PERCENT_THRESHOLD_PROP = 0.7;
+
+        @Override
+        public void init(int width, int height, CameraCalibration calibration) {
+            //don't need this
+        }
+
+        @Override
+        public Object processFrame(Mat input, long captureTimeNanos) {
+            Imgproc.cvtColor(input, mixture_1MAT, Imgproc.COLOR_RGB2HSV);
+            Scalar lowHSV = new Scalar(92, 50, 60);
+            Scalar highHSV = new Scalar(160, 250, 250);
+            Core.inRange(mixture_1MAT, lowHSV, highHSV, mixture_1MAT);
+
+            Mat rectangle = mixture_1MAT.submat(ROI);
+            double rectanglePercentage = Core.sumElems(rectangle).val[0] / ROI.area() / 255;
+            rectangle.release();
+
+            Scalar color = new Scalar(255, 100, 0);
+
+            Imgproc.rectangle(mixture_1MAT, ROI, color);
+            if (rectanglePercentage > PERCENT_THRESHOLD)
+                blueDetected = true;
+            else
+                blueDetected = false;
+            if (rectanglePercentage > PERCENT_THRESHOLD_PROP)
+                bluePropDetected = true;
+            else
+                bluePropDetected = false;
+            return null;
+
+        }
+
+        public void onDrawFrame(Canvas canvas, int onscreenWidth, int onscreenHeight, float scaleBmpPxToCanvasPx, float scaleCanvasDensity, Object userContext) {
+            //nothing here
+        }
+
+        public boolean getBlueDetected() {
+            return blueDetected;
+        }
+
+        public boolean getBluePropDetected() {
+            return bluePropDetected;
+        }
+    }//end process
 
     BLUEIDENTIFICATION blueIdentificationProcess;
     REDIDENTIFICATION redIdentificationProcess;
     VisionPortal visionPortal;
+    static final double Y_SHIFT = 6;
+    double coordinateX = 0;
+    double coordinateY = 0;
+    double heading = 0;
+    private AprilTagProcessor aprilTag;              // Used for managing the AprilTag detection process.
 
     @Override
     public void runOpMode() {
+        AprilTagProcessor tagProcessor = new AprilTagProcessor.Builder()
+                .setDrawAxes(true)
+                .setDrawCubeProjection(true)
+                .setDrawTagID(true)
+                .setDrawTagOutline(true)
+                .build();
         visionPortal = VisionPortal.easyCreateWithDefaults(hardwareMap.get(
-                WebcamName.class, "Webcam 1"), blueIdentificationProcess, redIdentificationProcess);
-        visionPortal.setProcessorEnabled(blueIdentificationProcess, true);
+                WebcamName.class, "Webcam 1"), blueIdentificationProcess, redIdentificationProcess, tagProcessor);
+        visionPortal.setProcessorEnabled(blueIdentificationProcess, false);
+        visionPortal.setProcessorEnabled(redIdentificationProcess, false);
+
         waitForStart();
 
+        tagProcessor.setPoseSolver(AprilTagProcessor.PoseSolver.OPENCV_IPPE_SQUARE);
+
         while (opModeIsActive()) {
-            telemetry.addLine("Connected");
+            boolean aprilTagNotFound = false;
+
+            //spin to find april tags
+
+            while (aprilTagNotFound) {
+                checkCoords(tagProcessor);
+                aprilTagNotFound = true;
+
+            }
+
+            if (//something) {
+                visionPortal.setProcessorEnabled(blueIdentificationProcess, true);
+            }
+            if (blueIdentificationProcess.getBlueDetected()) {
+                //do stuff
+            }
+            if (blueIdentificationProcess.getBluePropDetected()) {
+                //place pixel down
+            }
+            checkCoords(tagProcessor);
         }
-        visionPortal.close();
+    private boolean setManualExposure(int exposureMS, int gain) {
+        // Ensure Vision Portal has been setup.
+        if (visionPortal == null) {
+            return false;
+        }
+
+        // Wait for the camera to be open
+        if (visionPortal.getCameraState() != VisionPortal.CameraState.STREAMING) {
+            telemetry.addData("Camera", "Waiting");
+            telemetry.update();
+            while (!isStopRequested() && (visionPortal.getCameraState() != VisionPortal.CameraState.STREAMING)) {
+                sleep(20);
+            }
+            telemetry.addData("Camera", "Ready");
+            telemetry.update();
+        }
+
+        // Set camera controls unless we are stopping.
+        if (!isStopRequested())
+        {
+            // Set exposure.  Make sure we are in Manual Mode for these values to take effect.
+            ExposureControl exposureControl = visionPortal.getCameraControl(ExposureControl.class);
+            if (exposureControl.getMode() != ExposureControl.Mode.Manual) {
+                exposureControl.setMode(ExposureControl.Mode.Manual);
+                sleep(50);
+            }
+            exposureControl.setExposure((long)exposureMS, TimeUnit.MILLISECONDS);
+            sleep(20);
+
+            // Set Gain.
+            GainControl gainControl = visionPortal.getCameraControl(GainControl.class);
+            gainControl.setGain(gain);
+            sleep(20);
+            return (true);
+        } else {
+            return (false);
+        }
+    }
+
+    public double calculatePositionX(double IDx, double Apriltagx) {
+        return IDx - Apriltagx;
+    }
+
+    public double calculatePositionY(double IDy, double Apriltagy) {
+        return IDy - Apriltagy;
+    }
+
+    public void checkCoords(AprilTagProcessor tagProcessor) {
+        setManualExposure(6, 250);
+        if (tagProcessor.getDetections().size() > 0) {
+            AprilTagDetection tag = tagProcessor.getDetections().get(0);
+            switch (tag.metadata.id) {
+                case 1: {
+                    coordinateX = calculatePositionX(60, tag.ftcPose.y);
+                    coordinateY = (calculatePositionY(-42, tag.ftcPose.x) + Y_SHIFT);
+                    heading = 90;
+                    break;
+                }
+                case 2: {
+                    coordinateX = calculatePositionX(60, tag.ftcPose.y);
+                    coordinateY = (calculatePositionY(-36, tag.ftcPose.x) + Y_SHIFT);
+                    heading = 90;
+                    break;
+                }
+                case 3: {
+                    coordinateX = calculatePositionX(60, tag.ftcPose.y);
+                    coordinateY = (calculatePositionY(-30, tag.ftcPose.x) + Y_SHIFT);
+                    heading = 90;
+                    break;
+                }
+                case 4: {
+                    coordinateX = calculatePositionX(60, tag.ftcPose.y);
+                    coordinateY = (calculatePositionY(30, tag.ftcPose.x) + Y_SHIFT);
+                    heading = 90;
+                    break;
+                }
+                case 5: {
+                    coordinateX = calculatePositionX(60, tag.ftcPose.y);
+                    coordinateY = (calculatePositionY(36, tag.ftcPose.x) + Y_SHIFT);
+                    heading = 90;
+                    break;
+                }
+                case 6: {
+                    coordinateX = calculatePositionX(60, tag.ftcPose.y);
+                    coordinateY = (calculatePositionY(42, tag.ftcPose.x) + Y_SHIFT);
+                    heading = 90;
+                    break;
+                }
+                case 7: {
+                    coordinateX = calculatePositionX(-72, tag.ftcPose.y);
+                    coordinateY = (calculatePositionY(42, tag.ftcPose.x) + Y_SHIFT);
+                    heading = 270;
+                }
+                case 10: {
+                    coordinateX = calculatePositionX(-72, tag.ftcPose.y);
+                    coordinateY = (calculatePositionY(-42, tag.ftcPose.x) + Y_SHIFT);
+                    heading = 270;
+                }
+                default: {
+                    break;
+                }
+            }
+        }
     }
 }
+
