@@ -122,8 +122,7 @@ public class AutonomousBlue extends LinearOpMode {
             //spin to find april tags
 
             do {
-                checkCoords(tagProcessor);
-                aprilTagNotFound = true;
+                aprilTagNotFound = checkCoords(tagProcessor, aprilTagNotFound);
             } while (aprilTagNotFound);
 
             //depending on team head to these locations using RR
@@ -138,7 +137,6 @@ public class AutonomousBlue extends LinearOpMode {
             if (!dropPixelAtSpikeBoolean()) {
                 dropPixelAtSpikeVoid();
             }
-            checkCoords(tagProcessor);
         }
     }
 
@@ -189,7 +187,7 @@ public class AutonomousBlue extends LinearOpMode {
         return IDy - Apriltagy;
     }
 
-    public void checkCoords (AprilTagProcessor tagProcessor) {
+    public boolean checkCoords (AprilTagProcessor tagProcessor, boolean aprilTagNotFound) {
         setManualExposure(6, 250);
         if (tagProcessor.getDetections().size() > 0) {
             AprilTagDetection tag = tagProcessor.getDetections().get(0);
@@ -198,54 +196,66 @@ public class AutonomousBlue extends LinearOpMode {
                     coordinateX = calculatePositionX(60, tag.ftcPose.y);
                     coordinateY = (calculatePositionY(-42, tag.ftcPose.x) + Y_SHIFT);
                     heading = 90;
+                    aprilTagNotFound = false;
                     break;
                 }
                 case 2: {
                     coordinateX = calculatePositionX(60, tag.ftcPose.y);
                     coordinateY = (calculatePositionY(-36, tag.ftcPose.x) + Y_SHIFT);
                     heading = 90;
+                    aprilTagNotFound = false;
                     break;
                 }
                 case 3: {
                     coordinateX = calculatePositionX(60, tag.ftcPose.y);
                     coordinateY = (calculatePositionY(-30, tag.ftcPose.x) + Y_SHIFT);
                     heading = 90;
+                    aprilTagNotFound = false;
                     break;
                 }
                 case 4: {
                     coordinateX = calculatePositionX(60, tag.ftcPose.y);
                     coordinateY = (calculatePositionY(30, tag.ftcPose.x) + Y_SHIFT);
                     heading = 90;
+                    aprilTagNotFound = false;
                     break;
                 }
                 case 5: {
                     coordinateX = calculatePositionX(60, tag.ftcPose.y);
                     coordinateY = (calculatePositionY(36, tag.ftcPose.x) + Y_SHIFT);
                     heading = 90;
+                    aprilTagNotFound = false;
                     break;
                 }
                 case 6: {
                     coordinateX = calculatePositionX(60, tag.ftcPose.y);
                     coordinateY = (calculatePositionY(42, tag.ftcPose.x) + Y_SHIFT);
                     heading = 90;
+                    aprilTagNotFound = false;
                     break;
                 }
                 case 7: {
                     coordinateX = calculatePositionX(-72, tag.ftcPose.y);
                     coordinateY = (calculatePositionY(42, tag.ftcPose.x) + Y_SHIFT);
                     heading = 270;
+                    aprilTagNotFound = false;
+                    break;
                 }
                 case 10: {
                     coordinateX = calculatePositionX(-72, tag.ftcPose.y);
                     coordinateY = (calculatePositionY(-42, tag.ftcPose.x) + Y_SHIFT);
                     heading = 270;
+                    aprilTagNotFound = false;
+                    break;
                 }
                 default: {
+                    aprilTagNotFound = true;
                     break;
                 }
             }
         }
         setManualExposure(50, 100);
+        return aprilTagNotFound;
     }
 
     public void dropPixelAtSpikeVoid() { //returns true if drops
